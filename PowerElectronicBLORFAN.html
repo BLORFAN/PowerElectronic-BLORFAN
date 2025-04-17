@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Converter Designer - Dr. Ayman BLORFAN 2025</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Splash Screen Styles */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+            transition: opacity 1s ease-out;
+        }
+        
+        #splash-screen h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        #splash-screen p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            text-align: center;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        #splash-screen .progress-bar {
+            width: 300px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        #splash-screen .progress {
+            height: 100%;
+            width: 0%;
+            background-color: white;
+            animation: progress 3s forwards;
+        }
+        
+        @keyframes progress {
+            to { width: 100%; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Main Container Styles */
+        #main-container {
+            display: none;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a2a6c, #b21f1f);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+        
+        header p {
+            margin: 5px 0 0;
+            font-style: italic;
+        }
+        
+        /* Form Styles */
+        .design-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #1a2a6c;
+            box-shadow: 0 0 0 2px rgba(26, 42, 108, 0.2);
+        }
+        
+        .converter-type {
+            grid-column: span 2;
+        }
+        
+        .converter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .converter-option {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .converter-option input {
+            display: none;
+        }
+        
+        .converter-option label {
+            display: block;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .converter-option input:checked + label {
+            background-color: #1a2a6c;
+            color: white;
+        }
+        
+        .core-type {
+            grid-column: span 2;
+        }
+        
+        .core-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .core-option {
+            flex: 1;
+        }
+        
+        .core-option input {
+            display: none;
+        }
+        
+        .core-option label {
+            display: block;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .core-option input:checked + label {
+            background-color: #b21f1f;
+            color: white;
+        }
+        
+        .btn {
+            background-color: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            grid-column: span 2;
+        }
+        
+        .btn:hover {
+            background-color: #0f1a4a;
+        }
+        
+        /* Results Styles */
+        .results {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .results h2 {
+            margin-top: 0;
+            color: #1a2a6c;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .result-section {
+            margin-bottom: 20px;
+        }
+        
+        .result-section h3 {
+            margin-top: 0;
+            color: #b21f1f;
+            font-size: 1.1rem;
+        }
+        
+        .result-item {
+            margin-bottom: 10px;
+        }
+        
+        .result-item strong {
+            display: inline-block;
+            min-width: 150px;
+            color: #555;
+        }
+        
+        .transformer-diagram {
+            grid-column: span 3;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .transformer-diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .converter-diagram {
+            grid-column: span 3;
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .converter-diagram h3 {
+            color: #1a2a6c;
+            margin-bottom: 15px;
+        }
+        
+        .converter-diagram img {
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .converter-diagram p {
+            margin-top: 10px;
+            color: #666;
+            font-style: italic;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .converter-type, .core-type, .btn {
+                grid-column: span 1;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .transformer-diagram, .converter-diagram {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash-screen">
+        <h1>Power Converter Designer</h1>
+        <p>Advanced design tool for buck, boost, push-pull, and flyback converters with transformer design for both iron and ferrite cores. Created by Dr. Ayman BLORFAN in 2025.</p>
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+    </div>
+    
+    <!-- Main Application -->
+    <div id="main-container">
+        <header>
+            <h1>Power Converter Design Tool</h1>
+            <p>Design buck, boost, push-pull, and flyback converters with transformer calculations</p>
+        </header>
+        
+        <div class="design-form">
+            <h2>Converter Specifications</h2>
+            <form id="converter-form" class="form-grid">
+                <div class="form-group">
+                    <label for="power">Output Power (W)</label>
+                    <input type="number" id="power" step="0.1" min="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="input-voltage">Input Voltage (V)</label>
+                    <input type="number" id="input-voltage" step="0.1" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="output-voltage">Output Voltage (V)</label>
+                    <input type="number" id="output-voltage" step="0.1" min="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="output-current">Output Current (A)</label>
+                    <input type="number" id="output-current" step="0.01" min="0.01" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ripple">Output Ripple (%)</label>
+                    <input type="number" id="ripple" step="0.1" min="0.1" max="10" value="1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="frequency">Switching Frequency (kHz)</label>
+                    <input type="number" id="frequency" step="1" min="20" max="1000" value="100" required>
+                </div>
+                
+                <div class="form-group converter-type">
+                    <label>Converter Type</label>
+                    <div class="converter-options">
+                        <div class="converter-option">
+                            <input type="radio" id="buck" name="converter-type" value="buck" checked>
+                            <label for="buck">Buck</label>
+                        </div>
+                        <div class="converter-option">
+                            <input type="radio" id="boost" name="converter-type" value="boost">
+                            <label for="boost">Boost</label>
+                        </div>
+                        <div class="converter-option">
+                            <input type="radio" id="push-pull" name="converter-type" value="push-pull">
+                            <label for="push-pull">Push-Pull</label>
+                        </div>
+                        <div class="converter-option">
+                            <input type="radio" id="flyback" name="converter-type" value="flyback">
+                            <label for="flyback">Flyback</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group core-type">
+                    <label>Transformer Core Type</label>
+                    <div class="core-options">
+                        <div class="core-option">
+                            <input type="radio" id="iron" name="core-type" value="iron" checked>
+                            <label for="iron">Iron Core</label>
+                        </div>
+                        <div class="core-option">
+                            <input type="radio" id="ferrite" name="core-type" value="ferrite">
+                            <label for="ferrite">Ferrite Core</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="application">Application</label>
+                    <select id="application" required>
+                        <option value="general">General Purpose</option>
+                        <option value="power-supply">Power Supply</option>
+                        <option value="renewable">Renewable Energy</option>
+                        <option value="automotive">Automotive</option>
+                        <option value="telecom">Telecommunications</option>
+                        <option value="industrial">Industrial</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="control-type">Control Type</label>
+                    <select id="control-type" required>
+                        <option value="analog">Analog Control</option>
+                        <option value="digital">Digital Control</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn">Calculate Design</button>
+            </form>
+        </div>
+        
+        <div id="results" class="results">
+            <h2>Design Results</h2>
+            <div class="results-grid">
+                <div class="result-section">
+                    <h3>Switching Components</h3>
+                    <div class="result-item">
+                        <strong>Transistor Type:</strong> <span id="transistor-type"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Diode Type:</strong> <span id="diode-type"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Duty Cycle:</strong> <span id="duty-cycle"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Peak Current:</strong> <span id="peak-current"></span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Passive Components</h3>
+                    <div class="result-item">
+                        <strong>Inductor Value:</strong> <span id="inductor-value"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Capacitor Value:</strong> <span id="capacitor-value"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Output Resistor:</strong> <span id="output-resistor"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Input Capacitor:</strong> <span id="input-capacitor"></span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Transformer Design</h3>
+                    <div class="result-item">
+                        <strong>Turns Ratio:</strong> <span id="turns-ratio"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Core Size:</strong> <span id="core-size"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Primary Turns:</strong> <span id="primary-turns"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Secondary Turns:</strong> <span id="secondary-turns"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Wire Gauge:</strong> <span id="wire-gauge"></span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Control Loop</h3>
+                    <div class="result-item">
+                        <strong>Control Type:</strong> <span id="control-result"></span>
+                    </div>
+                    <div class="result-item" id="analog-control-items">
+                        <strong>Error Amp:</strong> <span id="error-amp"></span>
+                    </div>
+                    <div class="result-item" id="analog-control-items">
+                        <strong>Compensation:</strong> <span id="compensation"></span>
+                    </div>
+                    <div class="result-item" id="digital-control-items" style="display: none;">
+                        <strong>Controller IC:</strong> <span id="controller-ic"></span>
+                    </div>
+                    <div class="result-item" id="digital-control-items" style="display: none;">
+                        <strong>PWM Resolution:</strong> <span id="pwm-resolution"></span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Efficiency & Thermal</h3>
+                    <div class="result-item">
+                        <strong>Estimated Efficiency:</strong> <span id="efficiency"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Power Loss:</strong> <span id="power-loss"></span>
+                    </div>
+                    <div class="result-item">
+                        <strong>Heat Sink:</strong> <span id="heat-sink"></span>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <h3>Application Notes</h3>
+                    <div class="result-item">
+                        <strong>Application:</strong> <span id="application-result"></span>
+                    </div>
+                    <div id="application-notes" style="margin-top: 10px;"></div>
+                </div>
+                
+                <div class="transformer-diagram">
+                    <h3>Transformer Diagram</h3>
+                    <svg id="transformer-svg" width="400" height="200" viewBox="0 0 400 200"></svg>
+                </div>
+                
+                <div class="converter-diagram">
+                    <h3>Converter Schematic</h3>
+                    <div id="converter-image-container">
+                        <!-- Image will be inserted here by JavaScript -->
+                    </div>
+                    <p id="converter-description"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Converter type images (Base64 encoded for standalone operation)
+        const converterImages = {
+            buck: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjIwMCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFhMmE2YyI+QnVjayBDb252ZXJ0ZXIgU2NoZW1hdGljPC90ZXh0PjxwYXRoIGQ9Ik01MCwxMDAgTDEwMCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTEwMCw3MCBMMzAwLDcwIEwzMDAsMTMwIEwxMDAsMTMwIEwxMDAsNzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTEwMCwxMDAgTDEwMCwxMzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTMwMCwxMDAgTDM1MCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PHBhdGggZD0iTTE1MCw3MCBMMTUwLDEzMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjUwLDcwIEwyNTAsMTMwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPlN0ZXBzIGRvd24gVklOIHdoaWxlIG1haW50YWluaW5nIHRoZSBzYW1lIHBvbGFyaXR5PC90ZXh0Pjwvc3ZnPg==",
+            boost: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjIwMCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFhMmE2YyI+Qm9vc3QgQ29udmVydGVyIFNjaGVtYXRpYzwvdGV4dD48cGF0aCBkPSJNNTAsMTAwIEwxMDAsMTAwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xMDAsNzAgTDMwMCw3MCBMMzAwLDEzMCBMMTAsMTMwIEwxMDAsNzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTEwMCwxMDAgTDEwMCwxMzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTMwMCwxMDAgTDM1MCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PHBhdGggZD0iTTE1MCw3MCBMMTUwLDEzMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjUwLDcwIEwyNTAsMTMwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPlN0ZXBzIHVwIFZJTiB3aGlsZSBtYWludGFpbmluZyB0aGUgc2FtZSBwb2xhcml0eTwvdGV4dD48L3N2Zz4=",
+            "push-pull": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjIwMCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFhMmE2YyI+UHVzaC1QdWxsIENvbnZlcnRlciBTY2hlbWF0aWM8L3RleHQ+PHBhdGggZD0iTTUwLDEwMCBMMTAsMTAwIEwxMCw3MCBMMTUwLDcwIEwxNTAsMTMwIEwxMCwxMzAgTDEwLDEwMCBNMzUwLDEwMCBMNDAwLDEwMCBMNDAwLDcwIEwyNTAsNzAgTDI1MCwxMzAgTDQwMCwxMzAgTDQwMCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTE1MCwxMDAgTDI1MCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMjUwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PHBhdGggZD0iTTE3NSw3MCBMMTc1LDEzMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjI1LDcwIEwyMjUsMTMwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjx0ZXh0IHg9IjIwMCIgeT0iMTgwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NjYiPlVzZXMgdHdvIHRyYW5zaXN0b3JzIGFsdGVybmF0aW5nIHRvIGRyaXZlIHRoZSB0cmFuc2Zvcm1lcjwvdGV4dD48L3N2Zz4=",
+            flyback: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0MDAgMjAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjIwMCIgeT0iMzAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzFhMmE2YyI+Rmx5YmFjayBDb252ZXJ0ZXIgU2NoZW1hdGljPC90ZXh0PjxwYXRoIGQ9Ik01MCwxMDAgTDEwMCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTEwMCw3MCBMMzAwLDcwIEwzMDAsMTMwIEwxMDAsMTMwIEwxMDAsNzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTEwMCwxMDAgTDEwMCwxMzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTMwMCwxMDAgTDM1MCwxMDAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PGNpcmNsZSBjeD0iMTAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PGNpcmNsZSBjeD0iMzAwIiBjeT0iMTAwIiByPSI1IiBmaWxsPSIjMDAwIi8+PHBhdGggZD0iTTE1MCw3MCBMMTUwLDEzMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48cGF0aCBkPSJNMjUwLDcwIEwyNTAsMTMwIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMiIvPjxwYXRoIGQ9Ik0xODAsNzAgTDE4MCwxMzAiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTIyMCw3MCBMMjIwLDEzMCIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiLz48dGV4dCB4PSIyMDAiIHk9IjE4MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2Ij5TdG9yZXMgZW5lcmd5IGluIHRoZSB0cmFuc2Zvcm1lciBkdXJpbmcgb25lIGhhbGYtY3ljbGUgYW5kIHJlbGVhc2VzIGl0IGR1cmluZyB0aGUgb3RoZXI8L3RleHQ+PC9zdmc+"
+        };
+
+        // Converter descriptions
+        const converterDescriptions = {
+            buck: "Buck converter (step-down converter) reduces voltage while increasing current from input to output.",
+            boost: "Boost converter (step-up converter) increases voltage while decreasing current from input to output.",
+            "push-pull": "Push-pull converter uses two transistors in a push-pull configuration to drive the transformer.",
+            flyback: "Flyback converter stores energy in the transformer during one half-cycle and releases it during the other."
+        };
+
+        // Splash screen timeout
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('main-container').style.display = 'block';
+            }, 1000);
+        }, 3000);
+        
+        // Form submission
+        document.getElementById('converter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateDesign();
+        });
+        
+        // Control type change
+        document.getElementById('control-type').addEventListener('change', function() {
+            const controlType = this.value;
+            if (controlType === 'analog') {
+                document.querySelectorAll('#analog-control-items').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('#digital-control-items').forEach(el => el.style.display = 'none');
+            } else {
+                document.querySelectorAll('#analog-control-items').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('#digital-control-items').forEach(el => el.style.display = 'block');
+            }
+        });
+        
+        // Calculate design function
+        function calculateDesign() {
+            // Get input values
+            const power = parseFloat(document.getElementById('power').value);
+            const inputVoltage = parseFloat(document.getElementById('input-voltage').value);
+            const outputVoltage = parseFloat(document.getElementById('output-voltage').value);
+            const outputCurrent = parseFloat(document.getElementById('output-current').value);
+            const ripple = parseFloat(document.getElementById('ripple').value) / 100; // Convert % to decimal
+            const frequency = parseFloat(document.getElementById('frequency').value) * 1000; // Convert kHz to Hz
+            const converterType = document.querySelector('input[name="converter-type"]:checked').value;
+            const coreType = document.querySelector('input[name="core-type"]:checked').value;
+            const application = document.getElementById('application').value;
+            const controlType = document.getElementById('control-type').value;
+            
+            // Calculations
+            const dutyCycle = calculateDutyCycle(converterType, inputVoltage, outputVoltage);
+            const inductorValue = calculateInductor(converterType, inputVoltage, outputVoltage, outputCurrent, frequency, ripple);
+            const capacitorValue = calculateCapacitor(outputCurrent, dutyCycle, frequency, ripple, outputVoltage);
+            const turnsRatio = calculateTurnsRatio(converterType, inputVoltage, outputVoltage, dutyCycle);
+            
+            // Set results
+            document.getElementById('transistor-type').textContent = selectTransistor(power, inputVoltage, frequency);
+            document.getElementById('diode-type').textContent = selectDiode(outputVoltage, outputCurrent, frequency);
+            document.getElementById('duty-cycle').textContent = (dutyCycle * 100).toFixed(1) + '%';
+            document.getElementById('peak-current').textContent = (outputCurrent * 1.3).toFixed(2) + ' A';
+            document.getElementById('inductor-value').textContent = inductorValue.toFixed(3) + ' µH';
+            document.getElementById('capacitor-value').textContent = capacitorValue.toFixed(0) + ' µF';
+            document.getElementById('output-resistor').textContent = calculateOutputResistor(outputVoltage, outputCurrent);
+            document.getElementById('input-capacitor').textContent = calculateInputCapacitor(inputVoltage, outputCurrent, frequency, ripple);
+            document.getElementById('turns-ratio').textContent = '1:' + turnsRatio.toFixed(2);
+            document.getElementById('core-size').textContent = selectCoreSize(power, frequency, coreType);
+            document.getElementById('primary-turns').textContent = calculatePrimaryTurns(power, inputVoltage, frequency, coreType);
+            document.getElementById('secondary-turns').textContent = calculateSecondaryTurns(power, outputVoltage, frequency, coreType, turnsRatio);
+            document.getElementById('wire-gauge').textContent = selectWireGauge(outputCurrent);
+            document.getElementById('control-result').textContent = controlType === 'analog' ? 'Analog' : 'Digital';
+            document.getElementById('error-amp').textContent = selectErrorAmp(converterType);
+            document.getElementById('compensation').textContent = selectCompensation(converterType);
+            document.getElementById('controller-ic').textContent = selectControllerIC(converterType, controlType);
+            document.getElementById('pwm-resolution').textContent = '10-bit';
+            document.getElementById('efficiency').textContent = '85-92%';
+            document.getElementById('power-loss').textContent = (power * 0.1).toFixed(1) + ' W';
+            document.getElementById('heat-sink').textContent = selectHeatSink(power);
+            document.getElementById('application-result').textContent = document.getElementById('application').options[document.getElementById('application').selectedIndex].text;
+            
+            // Application notes
+            setApplicationNotes(application, converterType);
+            
+            // Draw transformer diagram
+            drawTransformer(coreType);
+            
+            // Show converter schematic image
+            showConverterImage(converterType);
+            
+            // Show results
+            document.getElementById('results').style.display = 'block';
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Show converter image based on type
+        function showConverterImage(converterType) {
+            const container = document.getElementById('converter-image-container');
+            const description = document.getElementById('converter-description');
+            
+            container.innerHTML = `<img src="${converterImages[converterType]}" alt="${converterType} converter schematic">`;
+            description.textContent = converterDescriptions[converterType];
+        }
+        
+        // Calculation functions
+        function calculateDutyCycle(converterType, Vin, Vout) {
+            switch(converterType) {
+                case 'buck': return Vout / Vin;
+                case 'boost': return 1 - (Vin / Vout);
+                case 'push-pull': 
+                case 'flyback': return Vout / (Vout + Vin);
+                default: return 0.5;
+            }
+        }
+        
+        function calculateInductor(converterType, Vin, Vout, Iout, freq, ripple) {
+            const deltaI = Iout * ripple;
+            switch(converterType) {
+                case 'buck': 
+                    return (Vin - Vout) * (Vout / Vin) / (freq * deltaI) * 1e6; // in µH
+                case 'boost':
+                    return Vin * (Vout - Vin) / (freq * deltaI * Vout) * 1e6;
+                default:
+                    return (Vin * (Vout / Vin)) / (freq * deltaI) * 1e6;
+            }
+        }
+        
+        function calculateCapacitor(Iout, dutyCycle, freq, ripple, Vout) {
+            const deltaV = Vout * ripple;
+            return (Iout * dutyCycle) / (freq * deltaV) * 1e6; // in µF
+        }
+        
+        function calculateTurnsRatio(converterType, Vin, Vout, dutyCycle) {
+            if (converterType === 'buck' || converterType === 'boost') return 1;
+            return Vout / (Vin * dutyCycle);
+        }
+        
+        function calculateOutputResistor(Vout, Iout) {
+            const R = Vout / Iout;
+            return R.toFixed(1) + ' Ω, ' + (R * 2).toFixed(1) + ' Ω (for feedback divider)';
+        }
+        
+        function calculateInputCapacitor(Vin, Iout, freq, ripple) {
+            const deltaV = Vin * ripple;
+            return (Iout / (freq * deltaV) * 1e6).toFixed(0) + ' µF';
+        }
+        
+        function calculatePrimaryTurns(power, Vin, freq, coreType) {
+            // Simplified calculation
+            const Bmax = coreType === 'ferrite' ? 0.2 : 1.2; // Tesla
+            const Ae = coreType === 'ferrite' ? 1.0 : 2.5; // cm²
+            return Math.ceil((Vin * 1e4) / (4 * Bmax * Ae * freq));
+        }
+        
+        function calculateSecondaryTurns(power, Vout, freq, coreType, turnsRatio) {
+            const primaryTurns = calculatePrimaryTurns(power, Vout / turnsRatio, freq, coreType);
+            return Math.ceil(primaryTurns * turnsRatio);
+        }
+        
+        // Component selection functions
+        function selectTransistor(power, voltage, freq) {
+            if (power > 100) {
+                return voltage > 200 ? 'IGBT' : 'Power MOSFET (e.g., IRFP4668)';
+            } else {
+                return freq > 100000 ? 'SiC MOSFET' : 'MOSFET (e.g., IRF540N)';
+            }
+        }
+        
+        function selectDiode(voltage, current, freq) {
+            if (freq > 100000) {
+                return 'Schottky (e.g., SB560)';
+            } else if (voltage > 200) {
+                return 'Ultrafast (e.g., UF4007)';
+            } else {
+                return 'Standard (e.g., 1N5408)';
+            }
+        }
+        
+        function selectCoreSize(power, freq, coreType) {
+            if (power < 50) return 'EE20 or EF25';
+            if (power < 100) return 'EE25 or EF30';
+            if (power < 200) return coreType === 'ferrite' ? 'ETD34' : 'EI33';
+            return coreType === 'ferrite' ? 'ETD44' : 'EI50';
+        }
+        
+        function selectWireGauge(current) {
+            if (current < 1) return 'AWG 24-26';
+            if (current < 5) return 'AWG 20-22';
+            if (current < 10) return 'AWG 16-18';
+            return 'AWG 12-14';
+        }
+        
+        function selectErrorAmp(converterType) {
+            return 'Op-Amp (e.g., TL081) with gain of ' + 
+                   (converterType === 'buck' ? '10-20' : 
+                    converterType === 'boost' ? '15-25' : '20-30');
+        }
+        
+        function selectCompensation(converterType) {
+            return converterType === 'buck' ? 'Type II compensation' : 'Type III compensation';
+        }
+        
+        function selectControllerIC(converterType, controlType) {
+            if (controlType === 'digital') {
+                return 'Microcontroller (e.g., STM32) or DSP';
+            }
+            
+            switch(converterType) {
+                case 'buck': return 'UC3843';
+                case 'boost': return 'UC3842';
+                case 'push-pull': return 'SG3525';
+                case 'flyback': return 'UC3845';
+                default: return 'TL494';
+            }
+        }
+        
+        function selectHeatSink(power) {
+            if (power < 20) return 'Small heatsink or none';
+            if (power < 50) return 'Medium heatsink';
+            if (power < 100) return 'Large heatsink with fan';
+            return 'Custom heatsink with forced air cooling';
+        }
+        
+        function setApplicationNotes(application, converterType) {
+            const notes = document.getElementById('application-notes');
+            let html = '';
+            
+            switch(application) {
+                case 'power-supply':
+                    html = '<p>For power supply applications, ensure proper EMI filtering and consider adding overvoltage protection.</p>';
+                    break;
+                case 'renewable':
+                    html = '<p>For renewable energy systems, implement MPPT algorithms if needed and ensure wide input voltage range capability.</p>';
+                    break;
+                case 'automotive':
+                    html = '<p>Automotive applications require robust design for vibration and temperature extremes. Add load dump protection.</p>';
+                    break;
+                case 'telecom':
+                    html = '<p>Telecom designs need high efficiency and often -48V input capability. Consider power factor correction.</p>';
+                    break;
+                case 'industrial':
+                    html = '<p>Industrial environments require rugged design with protection against surges and transients.</p>';
+                    break;
+                default:
+                    html = '<p>Standard design practices apply. Consider adding basic protection circuits.</p>';
+            }
+            
+            // Add converter-specific notes
+            html += '<p>';
+            switch(converterType) {
+                case 'buck':
+                    html += 'Buck converter: Ensure input voltage is always higher than output. Watch for minimum duty cycle limitations.';
+                    break;
+                case 'boost':
+                    html += 'Boost converter: Be aware of right-half-plane zero in control loop. Consider current-mode control.';
+                    break;
+                case 'push-pull':
+                    html += 'Push-pull converter: Ensure symmetrical drive to prevent transformer saturation. Needs flux balancing.';
+                    break;
+                case 'flyback':
+                    html += 'Flyback converter: Good for multiple outputs. Watch for transformer leakage inductance effects.';
+                    break;
+            }
+            html += '</p>';
+            
+            notes.innerHTML = html;
+        }
+        
+        // Draw transformer diagram
+        function drawTransformer(coreType) {
+            const svg = document.getElementById('transformer-svg');
+            svg.innerHTML = '';
+            
+            const coreColor = coreType === 'ferrite' ? '#666' : '#964B00';
+            const wireColor = '#FFD700';
+            
+            // Core
+            if (coreType === 'ferrite') {
+                // Ferrite core (EE type)
+                svg.innerHTML += `
+                    <rect x="100" y="50" width="200" height="100" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                    <rect x="80" y="70" width="40" height="60" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                    <rect x="280" y="70" width="40" height="60" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                `;
+            } else {
+                // Iron core (EI type)
+                svg.innerHTML += `
+                    <rect x="120" y="50" width="160" height="100" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                    <rect x="100" y="70" width="40" height="60" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                    <rect x="260" y="70" width="40" height="60" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                    <rect x="140" y="30" width="120" height="20" fill="none" stroke="${coreColor}" stroke-width="10"/>
+                `;
+            }
+            
+            // Windings
+            svg.innerHTML += `
+                <path d="M60,100 Q80,80 100,100 Q120,120 140,100 Q160,80 180,100" stroke="${wireColor}" stroke-width="3" fill="none"/>
+                <path d="M220,100 Q240,80 260,100 Q280,120 300,100 Q320,80 340,100" stroke="${wireColor}" stroke-width="3" fill="none"/>
+                <text x="70" y="70" fill="white">Primary</text>
+                <text x="310" y="70" fill="white">Secondary</text>
+            `;
+        }
+    </script>
+</body>
+</html>
